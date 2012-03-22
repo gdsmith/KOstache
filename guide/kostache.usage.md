@@ -2,7 +2,7 @@
 
 View classes go in classes/view/
 
-classes/view/example.php
+views/example.php
 
 	class View_Example extends Kostache
 	{

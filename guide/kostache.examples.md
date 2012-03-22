@@ -1,5 +1,7 @@
 # Kostache Examples
 
+These examples are for the original KO3 Kostache so ymmv.
+
 ## Complex Example
 
 Model (This example uses [AutoModeler](http://github.com/zombor/Auto-Modeler)):

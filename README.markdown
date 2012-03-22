@@ -1,6 +1,6 @@
 # Kostache
 
-Kostache is a [Kohana 3](https://github.com/kohana/kohana) module for using [Mustache](http://defunkt.github.com/mustache/) templates in your application.
+Kostache is a [Kohana 2](http://dev.kohanaframework.org/projects/kohana2/files) module for using [Mustache](http://defunkt.github.com/mustache/) templates in your application.
 
 Mustache is a logic-less template class. It is impossible to embed logic into mustache files.
 
@@ -50,11 +50,11 @@ Did you know the pagination view in Kohana is terrible? We are going to fix it:
 
 Wow, look at all that logic in there! How do you plan on effectively maintaining that?!?
 
-### Our new View Class (classes/view/pagination/basic.php)
+### Our new View Class (views/pagination/basic.php)
 
 	<?php defined('SYSPATH') or die('No direct script access.');
 
-	class View_Pagination_Basic extends kostache {
+	class View_Pagination_Basic extends Kostache {
 	
 		protected $pagination;
 
