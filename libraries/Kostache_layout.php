@@ -10,7 +10,7 @@
  * @copyright  (c) 2011-2012 Woody Gilk
  * @license    MIT
  */
-abstract class Kohana_Kostache_Layout extends Kostache {
+abstract class Kostache_Layout_Core extends Kostache {
 
 	/**
 	 * @var  string  partial name for content

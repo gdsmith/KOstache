@@ -1,4 +1,8 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') OR die('No direct access allowed.');
+
+// Load Mustache for PHP
+include Kohana::find_file('vendor', 'mustache/Mustache');
+
 /**
  * Mustache templates for Kohana.
  *
@@ -10,8 +14,8 @@
  * @copyright  (c) 2011-2012 Woody Gilk
  * @license    MIT
  */
-abstract class Kohana_Kostache {
-
+class Kostache_Core {
+	
 	const VERSION = '2.0.6';
 
 	/**
@@ -26,12 +30,18 @@ abstract class Kohana_Kostache {
 	public static function factory($path, array $partials = NULL)
 	{
 		$class = 'View_'.str_replace('/', '_', $path);
-
+		
 		if ( ! class_exists($class))
 		{
-			throw new Kohana_Exception('View class does not exist: :class', array(
-				':class' => $class,
-			));
+			$file = Kohana::find_file('views', $class);
+			if ( ! $file)
+			{
+				throw new Kohana_Exception("Class '$class' not found");
+			}
+			else
+			{
+				include_once($file);
+			}
 		}
 
 		return new $class(NULL, $partials);
@@ -223,8 +233,8 @@ abstract class Kohana_Kostache {
 	 */
 	protected function _stash($template, Kostache $view, array $partials)
 	{
-		return new Kohana_Mustache($template, $view, $partials, array(
-			'charset' => Kohana::$charset,
+		return new Mustache($template, $view, $partials, array(
+			'charset' => 'UTF-8',
 		));
 	}
 
@@ -237,13 +247,11 @@ abstract class Kohana_Kostache {
 	 */
 	protected function _load($path)
 	{
-		$file = Kohana::find_file('templates', $path, 'mustache');
+		$file = Kohana::find_file('templates', $path, FALSE, 'mustache');
 
 		if ( ! $file)
 		{
-			throw new Kohana_Exception('Template file does not exist: :path', array(
-				':path' => 'templates/'.$path,
-			));
+			throw new Kohana_Exception('Template file does not exist: templates/'.$path);
 		}
 
 		return file_get_contents($file);
@@ -267,5 +275,5 @@ abstract class Kohana_Kostache {
 
 		return $template;
 	}
-
-}
+	
+} // End KOstache Library
