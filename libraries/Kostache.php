@@ -29,7 +29,7 @@ class Kostache_Core {
 	 */
 	public static function factory($path, array $partials = NULL)
 	{
-		$class = 'View_'.str_replace('/', '_', $path);
+		$class = str_replace('/', '_', $path) . '_View';
 		
 		if ( ! class_exists($class))
 		{
