@@ -267,8 +267,8 @@ class Kostache_Core {
 		// Start creating the template path from the class name
 		$template = explode('_', get_class($this));
 
-		// Remove "View" prefix
-		array_shift($template);
+		// Remove "View" suffix
+		array_pop($template);
 
 		// Convert name parts into a path
 		$template = strtolower(implode('/', $template));
