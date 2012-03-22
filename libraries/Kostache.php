@@ -33,7 +33,7 @@ class Kostache_Core {
 		
 		if ( ! class_exists($class))
 		{
-			$file = Kohana::find_file('views', $class);
+			$file = Kohana::find_file('views', $path);
 			if ( ! $file)
 			{
 				throw new Kohana_Exception("Class '$class' not found");
