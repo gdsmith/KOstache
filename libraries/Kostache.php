@@ -121,7 +121,7 @@ class Kostache_Core {
 			ob_start();
 
 			// Render the exception
-			Kohana_Exception::handler($e);
+			new Kohana_Exception($e);
 
 			return (string) ob_get_clean();
 		}
