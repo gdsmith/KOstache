@@ -1,5 +1,31 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
+/**
+ * autoloader for kostache views 
+ * we need this so that views can be extended
+ *
+ * @package default
+ * @author George McGinley Smith
+ */
+function Kostache_auto_load($class)
+{
+	if (class_exists($class) || substr($class, -5) != '_View' )
+		return;
+
+	$path = str_replace('_', '/', substr($class, 0, -5));
+	$file = Kohana::find_file('views', $path);
+	if ( ! $file)
+	{
+		throw new Exception("Class '$class' not found");
+	}
+	else
+	{
+		include_once($file);
+	}
+}
+
+spl_autoload_register('Kostache_auto_load');
+
 // Load Mustache for PHP
 include Kohana::find_file('vendor', 'mustache/Mustache');
 
@@ -29,22 +55,15 @@ class Kostache_Core {
 	 */
 	public static function factory($path, array $partials = NULL)
 	{
-		$class = str_replace('/', '_', $path) . '_View';
-		
-		if ( ! class_exists($class))
+		try
 		{
-			$file = Kohana::find_file('views', $path);
-			if ( ! $file)
-			{
-				throw new Kohana_Exception("Class '$class' not found");
-			}
-			else
-			{
-				include_once($file);
-			}
+			$class = str_replace('/', '_', $path) . '_View';
+			return new $class(NULL, $partials);
 		}
-
-		return new $class(NULL, $partials);
+		catch (Exception $e)
+		{
+			throw new Exception("View '$path' not found: " . $e->getMessage());
+		}
 	}
 
 	/**
