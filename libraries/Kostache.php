@@ -24,7 +24,9 @@ function Kostache_auto_load($class)
 	}
 }
 
-spl_autoload_register('Kostache_auto_load');
+// register autoloader with the following options:
+// don't throw exceptions and prepend this to the register stack (so Swift doesn't throw a wobbly)
+spl_autoload_register('Kostache_auto_load', FALSE, TRUE);
 
 // Load Mustache for PHP
 include Kohana::find_file('vendor', 'mustache/Mustache');
