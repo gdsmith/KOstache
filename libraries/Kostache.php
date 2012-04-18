@@ -1,7 +1,7 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
 // Load Mustache for PHP
-include Kohana::find_file('vendor', 'mustache/Mustache');
+include_once Kohana::find_file('vendor', 'mustache/Mustache');
 
 /**
  * Mustache templates for Kohana.
