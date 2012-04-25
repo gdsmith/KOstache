@@ -22,8 +22,8 @@ class Kostache_Core {
 	 * Factory method for Kostache views. Accepts a template path and an
 	 * optional array of partial paths.
 	 *
-	 * @param   string  template path
-	 * @param   array   partial paths
+	 * @param   string  $path     template path
+	 * @param   array   $partials partial paths
 	 * @return  Kostache
 	 * @throws  Kohana_Exception  if the view class does not exist
 	 */
@@ -31,12 +31,12 @@ class Kostache_Core {
 	{
 		try
 		{
-			$class = str_replace('/', '_', $path) . '_View';
+			$class = str_replace('/', '_', $path).'_View';
 			return new $class(NULL, $partials);
 		}
 		catch (Exception $e)
 		{
-			throw new Exception("View '$path' not found: " . $e->getMessage());
+			throw new Exception("View '$path' not found: ".$e->getMessage());
 		}
 	}
 
@@ -53,8 +53,8 @@ class Kostache_Core {
 	/**
 	 * Loads the template and partial paths.
 	 *
-	 * @param   string  template path
-	 * @param   array   partial paths
+	 * @param   string  $path     template path
+	 * @param   array   $partials partial paths
 	 * @return  void
 	 * @uses    Kostache::template
 	 * @uses    Kostache::partial
@@ -136,8 +136,8 @@ class Kostache_Core {
 	 * Loads a new partial from a path. If the path is empty, the partial will
 	 * be removed.
 	 *
-	 * @param   string  partial name
-	 * @param   mixed   partial path, FALSE to remove the partial
+	 * @param   string  $name  partial name
+	 * @param   mixed   $path  partial path, FALSE to remove the partial
 	 * @return  Kostache
 	 */
 	public function partial($name, $path)
@@ -165,8 +165,8 @@ class Kostache_Core {
 	 *     // Create the values {{food}} and {{beverage}} in the template
 	 *     $view->set(array('food' => 'bread', 'beverage' => 'water'));
 	 *
-	 * @param   string   variable name or an array of variables
-	 * @param   mixed    value
+	 * @param   string   $key    variable name or an array of variables
+	 * @param   mixed    $value  value
 	 * @return  $this
 	 */
 	public function set($key, $value = NULL)
@@ -195,8 +195,8 @@ class Kostache_Core {
 	 *     // This reference can be accessed as {{ref}} within the template
 	 *     $view->bind('ref', $bar);
 	 *
-	 * @param   string   variable name
-	 * @param   mixed    referenced variable
+	 * @param   string   $key    variable name
+	 * @param   mixed    $value  referenced variable
 	 * @return  $this
 	 */
 	public function bind($key, & $value)
@@ -219,9 +219,9 @@ class Kostache_Core {
 	/**
 	 * Return a new Mustache for the given template, view, and partials.
 	 *
-	 * @param   string    template
-	 * @param   Kostache  view object
-	 * @param   array     partial templates
+	 * @param   string    $template  template
+	 * @param   Kostache  $view      view object
+	 * @param   array     $partials  partial templates
 	 * @return  Mustache
 	 */
 	protected function _stash($template, Kostache $view, array $partials)
@@ -234,7 +234,7 @@ class Kostache_Core {
 	/**
 	 * Load a template and return it.
 	 *
-	 * @param   string  template path
+	 * @param   string  $path  template path
 	 * @return  string
 	 * @throws  Kohana_Exception  if the template does not exist
 	 */

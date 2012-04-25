@@ -7,9 +7,9 @@
  * @package default
  * @author George McGinley Smith
  */
-function Kostache_auto_load($class)
+function kostache_auto_load($class)
 {
-	if (class_exists($class) || substr($class, -5) != '_View' )
+	if (class_exists($class) OR substr($class, -5) != '_View')
 		return;
 
 	$path = str_replace('_', '/', substr($class, 0, -5));
@@ -26,4 +26,4 @@ function Kostache_auto_load($class)
 
 // register autoloader with the following options:
 // don't throw exceptions and prepend this to the register stack (so Swift doesn't throw a wobbly)
-spl_autoload_register('Kostache_auto_load', FALSE, TRUE);
+spl_autoload_register('kostache_auto_load', FALSE, TRUE);
