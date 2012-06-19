@@ -16,11 +16,11 @@ function kostache_auto_load($class)
 	$file = Kohana::find_file('views', $path);
 	if ( ! $file)
 	{
-		throw new Exception("Class '$class' not found");
+		throw new Exception('No views/'.$path.'.php for class '.$class);
 	}
 	else
 	{
-		include_once($file);
+		require($file);
 	}
 }
 
