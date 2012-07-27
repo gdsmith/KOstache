@@ -13,7 +13,7 @@ function kostache_auto_load($class)
 		return;
 
 	$path = str_replace('_', '/', substr($class, 0, -5));
-	$file = Kohana::find_file('views', $path);
+	$file = Kohana::find_file('k_views', $path);
 	if ( ! $file)
 	{
 		throw new Exception('No views/'.$path.'.php for class '.$class);
