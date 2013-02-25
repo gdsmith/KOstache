@@ -213,7 +213,7 @@ class Kostache_Core {
 	 */
 	public function render()
 	{
-		return $this->_stash($this->_template, $this, $this->_partials)->render();
+		return $this->_stash($this->_template, $this, $this->_partials)->__toString();
 	}
 
 	/**
