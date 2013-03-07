@@ -1,7 +1,9 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
 // Load Mustache for PHP
-include_once Kohana::find_file('vendor', 'mustache/Mustache');
+require_once Kohana::find_file('vendor', 'mustache/src/Mustache/Autoloader');
+Mustache_Autoloader::register();
+
 
 /**
  * Mustache templates for Kohana.
@@ -16,257 +18,43 @@ include_once Kohana::find_file('vendor', 'mustache/Mustache');
  */
 class Kostache_Core {
 	
-	const VERSION = '2.0.6';
+	const VERSION = '4.0.0';
 
-	/**
-	 * Factory method for Kostache views. Accepts a template path and an
-	 * optional array of partial paths.
-	 *
-	 * @param   string  $path     template path
-	 * @param   array   $partials partial paths
-	 * @return  Kostache
-	 * @throws  Kohana_Exception  if the view class does not exist
-	 */
-	public static function factory($path, array $partials = NULL)
+	protected $_engine;
+
+	public static function factory($config = NULL)
 	{
-		try
+		if ( ! $config)
 		{
-			$class = str_replace('/', '_', $path).'_View';
-			return new $class(NULL, $partials);
+			$config = Kohana::config('mustache', array(
+ 				'loader' => new Kostache_Loader(),
+ 				'partials_loader' => new Kostache_Loader('templates/partials'),
+ 				'escape' => function($value) {
+ 					return html::specialchars($value);
+ 				},
+ 				'cache' => APPPATH.'cache/mustache',
+ 				'logger' => new Kostache_Logger(Mustache_Logger::INFO),
+			 ));
 		}
-		catch (Exception $e)
-		{
-			throw new Exception("View '$path' not found: ".$e->getMessage());
-		}
+		$m = new Mustache_Engine($config);
+
+		$class = get_called_class();
+		return new $class($m);
 	}
 
-	/**
-	 * @var  string  Mustache template
-	 */
-	protected $_template;
-
-	/**
-	 * @var  array  Mustache partials
-	 */
-	protected $_partials = array();
-
-	/**
-	 * Loads the template and partial paths.
-	 *
-	 * @param   string  $path     template path
-	 * @param   array   $partials partial paths
-	 * @return  void
-	 * @uses    Kostache::template
-	 * @uses    Kostache::partial
-	 */
-	public function __construct($template = NULL, array $partials = NULL)
+	public function __construct($engine)
 	{
-		if ( ! $template)
-		{
-			if ($this->_template)
-			{
-				// Load the template defined in the view
-				$template = $this->_template;
-			}
-			else
-			{
-				// Detect the template for this class
-				$template = $this->_detect_template();
-			}
-		}
-
-		// Load the template
-		$this->template($template);
-
-		if ($this->_partials)
-		{
-			foreach ($this->_partials as $name => $path)
-			{
-				// Load the partials defined in the view
-				$this->partial($name, $path);
-			}
-		}
-
-		if ($partials)
-		{
-			foreach ($partials as $name => $path)
-			{
-				// Load the partial
-				$this->partial($name, $path);
-			}
-		}
+		$this->_engine = $engine;
 	}
 
-	/**
-	 * Magic method, returns the output of [Kostache::render].
-	 *
-	 * @return  string
-	 * @uses    Kostache::render
-	 */
-	public function __toString()
+	public function render($class, $template = NULL)
 	{
-		try
+		if ($template == NULL)
 		{
-			return $this->render();
+			$template = explode('_', get_class($class));
+			array_pop($template);
+			$template = implode('/', $template);
 		}
-		catch (Exception $e)
-		{
-			ob_start();
-
-			// Render the exception
-			new Kohana_Exception($e);
-
-			return (string) ob_get_clean();
-		}
+		return $this->_engine->loadTemplate($template)->render($class);
 	}
-
-	/**
-	 * Loads a new template from a path.
-	 *
-	 * @return  Kostache
-	 */
-	public function template($path)
-	{
-		$this->_template = $this->_load($path);
-
-		return $this;
-	}
-
-	/**
-	 * Loads a new partial from a path. If the path is empty, the partial will
-	 * be removed.
-	 *
-	 * @param   string  $name  partial name
-	 * @param   mixed   $path  partial path, FALSE to remove the partial
-	 * @return  Kostache
-	 */
-	public function partial($name, $path)
-	{
-		if ( ! $path)
-		{
-			unset($this->_partials[$name]);
-		}
-		else
-		{
-			$this->_partials[$name] = $this->_load($path);
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Assigns a variable by name.
-	 *
-	 *     // This value can be accessed as {{foo}} within the template
-	 *     $view->set('foo', 'my value');
-	 *
-	 * You can also use an array to set several values at once:
-	 *
-	 *     // Create the values {{food}} and {{beverage}} in the template
-	 *     $view->set(array('food' => 'bread', 'beverage' => 'water'));
-	 *
-	 * @param   string   $key    variable name or an array of variables
-	 * @param   mixed    $value  value
-	 * @return  $this
-	 */
-	public function set($key, $value = NULL)
-	{
-		if (is_array($key))
-		{
-			foreach ($key as $name => $value)
-			{
-				$this->{$name} = $value;
-			}
-		}
-		else
-		{
-			$this->{$key} = $value;
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Assigns a value by reference. The benefit of binding is that values can
-	 * be altered without re-setting them. It is also possible to bind variables
-	 * before they have values. Assigned values will be available as a
-	 * variable within the template file:
-	 *
-	 *     // This reference can be accessed as {{ref}} within the template
-	 *     $view->bind('ref', $bar);
-	 *
-	 * @param   string   $key    variable name
-	 * @param   mixed    $value  referenced variable
-	 * @return  $this
-	 */
-	public function bind($key, & $value)
-	{
-		$this->{$key} =& $value;
-
-		return $this;
-	}
-
-	/**
-	 * Renders the template using the current view.
-	 *
-	 * @return  string
-	 */
-	public function render()
-	{
-		return $this->_stash($this->_template, $this, $this->_partials)->__toString();
-	}
-
-	/**
-	 * Return a new Mustache for the given template, view, and partials.
-	 *
-	 * @param   string    $template  template
-	 * @param   Kostache  $view      view object
-	 * @param   array     $partials  partial templates
-	 * @return  Mustache
-	 */
-	protected function _stash($template, Kostache $view, array $partials)
-	{
-		return new Mustache($template, $view, $partials, array(
-			'charset' => 'UTF-8',
-		));
-	}
-
-	/**
-	 * Load a template and return it.
-	 *
-	 * @param   string  $path  template path
-	 * @return  string
-	 * @throws  Kohana_Exception  if the template does not exist
-	 */
-	protected function _load($path)
-	{
-		$file = Kohana::find_file('templates', $path, FALSE, 'mustache');
-
-		if ( ! $file)
-		{
-			throw new Kohana_Exception('Template file does not exist: templates/'.$path);
-		}
-
-		return file_get_contents($file);
-	}
-
-	/**
-	 * Detect the template name from the class name.
-	 *
-	 * @return  string
-	 */
-	protected function _detect_template()
-	{
-		// Start creating the template path from the class name
-		$template = explode('_', get_class($this));
-
-		// Remove "View" suffix
-		array_pop($template);
-
-		// Convert name parts into a path
-		$template = strtolower(implode('/', $template));
-
-		return $template;
-	}
-	
 } // End KOstache Library

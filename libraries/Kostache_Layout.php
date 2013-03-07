@@ -10,7 +10,7 @@
  * @copyright  (c) 2011-2012 Woody Gilk
  * @license    MIT
  */
-abstract class Kostache_layout_Core extends Kostache {
+class Kostache_Layout_Core extends Kostache {
 
 	/**
 	 * @var  string  partial name for content
@@ -18,29 +18,31 @@ abstract class Kostache_layout_Core extends Kostache {
 	const CONTENT_PARTIAL = 'content';
 
 	/**
-	 * @var  boolean  render template in layout?
-	 */
-	public $render_layout = TRUE;
-
-	/**
 	 * @var  string  layout path
 	 */
 	protected $_layout = 'layout';
 
-	public function render()
+	public static function factory($layout = 'layout')
 	{
-		if ( ! $this->render_layout)
-		{
-			return parent::render();
-		}
+		$k = parent::factory();
+		$k->set_layout($layout);
+		return $k;
+	}
 
-		$partials = $this->_partials;
+	public function set_layout($layout)
+	{
+		$this->_layout = (string) $layout;
+	}
 
-		$partials[Kostache_Layout::CONTENT_PARTIAL] = $this->_template;
+	public function render($class, $template = NULL)
+	{
+		$this->_engine->setPartials(
+			array(
+				Kostache_Layout::CONTENT_PARTIAL => parent::render($class, $template)
+			)
+		);
 
-		$template = $this->_load($this->_layout);
-
-		return $this->_stash($template, $this, $partials)->render();
+		return $this->_engine->loadTemplate($this->_layout)->render($class);
 	}
 
 }
