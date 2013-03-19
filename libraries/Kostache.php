@@ -12,6 +12,7 @@ Mustache_Autoloader::register();
  * @category   Base
  * @author     Jeremy Bush <jeremy.bush@kohanaframework.org>
  * @author     Woody Gilk <woody.gilk@kohanaframework.org>
+ * @author     George McGinley Smith <george@mukuru.com>
  * @copyright  (c) 2010-2012 Jeremy Bush
  * @copyright  (c) 2011-2012 Woody Gilk
  * @license    MIT
@@ -52,9 +53,96 @@ class Kostache_Core {
 		if ($template == NULL)
 		{
 			$template = explode('_', get_class($class));
-			array_pop($template);
+			// View_viewname_Core allows overriding
+			if (array_key_exists('Core', $template))
+			{
+				// remove _Core
+				array_pop($template);
+			}
+			// remove View_
+			array_shift($template);
 			$template = implode('/', $template);
 		}
 		return $this->_engine->loadTemplate($template)->render($class);
 	}
+	
+	/**
+	 * autoloader for kostache views 
+	 * we need this so that views can be extended
+	 *
+	 * @package default
+	 * @author George McGinley Smith
+	 */
+	public static function auto_load($class)
+	{
+		if (class_exists($class) OR substr($class, 0, 5) != 'View_')
+			return;
+		
+		$type = 'k_views';
+		if (($suffix = strrpos($class, '_')) > 0)
+		{
+			// Find the class suffix
+			$suffix = substr($class, $suffix + 1);
+		}
+		else
+		{
+			// No suffix
+			$suffix = FALSE;
+		}
+
+		if ($suffix === 'Core')
+		{
+			$file = substr($class, 5, -5);
+		}
+		else
+		{
+			$file = substr($class, 5);
+		}
+		
+		$file = str_replace('_', '/', $file);
+
+		if ($filename = Kohana::find_file($type, $file))
+		{
+			// Load the class
+			require $filename;
+		}
+		else
+		{
+			// The class could not be found
+			throw new Exception('No views/'.$path.'.php for class '.$class);
+			// return FALSE;
+		}
+
+		$path = explode('/', $file);
+		$prefixed = Kohana::config('core.extension_prefix').array_pop($path);
+		$prefixed = implode('/', $path).'/'.$prefixed;
+
+		if ($filename = Kohana::find_file($type, $prefixed))
+		{
+			// Load the class extension
+			require $filename;
+		}
+		elseif ($suffix !== 'Core' AND class_exists($class.'_Core', FALSE))
+		{
+			// Class extension to be evaluated
+			$extension = 'class '.$class.' extends '.$class.'_Core { }';
+
+			// Start class analysis
+			$core = new ReflectionClass($class.'_Core');
+
+			if ($core->isAbstract())
+			{
+				// Make the extension abstract
+				$extension = 'abstract '.$extension;
+			}
+
+			// Transparent class extensions are handled using eval. This is
+			// a disgusting hack, but it gets the job done.
+			eval($extension);
+		}
+		
+		return TRUE;
+
+	}
+
 } // End KOstache Library
