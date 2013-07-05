@@ -3,7 +3,7 @@
  * Kostache_Loader Library For loading a kostache
  * @package       
  * @author        George McGinley Smith
- * @copyright     (c) GSGD 2013
+ * @copyright     (c) Mukuru 2013
  * 
  */
  class Kostache_Loader_Core implements Mustache_Loader, Mustache_Loader_MutableLoader
