@@ -109,7 +109,7 @@ class Kostache_Core {
 		else
 		{
 			// The class could not be found
-			throw new Exception('No views/'.$path.'.php for class '.$class);
+			throw new Kostache_Exception('kostache.missing_view', $file, $class);
 			// return FALSE;
 		}
 
@@ -146,3 +146,5 @@ class Kostache_Core {
 	}
 
 } // End KOstache Library
+
+class Kostache_Exception extends Kohana_Exception {}
